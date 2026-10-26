@@ -9,7 +9,6 @@ function createLaxmiBombTexture() {
   ctx.fillStyle = '#1c5e2d';
   ctx.fillRect(0, 0, 128, 128);
 
-  // Golden criss-cross jute twine string
   ctx.strokeStyle = '#d4af37';
   ctx.lineWidth = 10;
   ctx.beginPath();
@@ -17,7 +16,6 @@ function createLaxmiBombTexture() {
   ctx.moveTo(0, 64); ctx.lineTo(128, 64);
   ctx.stroke();
 
-  // Red seal
   ctx.fillStyle = '#b71c1c';
   ctx.beginPath();
   ctx.arc(64, 64, 28, 0, Math.PI * 2);
@@ -78,7 +76,7 @@ export class Cracker {
 
     this.localFuseTip = new THREE.Vector3(0, 1.2, 0);
     this.sizzleTime = 0;
-    this.sizzleDuration = 1.0;
+    this.sizzleDuration = 1.35; // 1.35 seconds of realistic visible string burning
 
     // Performance states
     this.performTime = 0;
@@ -138,14 +136,12 @@ export class Cracker {
     band.position.y = 0.5;
     this.group.add(band);
 
-    // Glowing nozzle rim at top
     const nozzleMat = new THREE.MeshBasicMaterial({ color: 0xffcc33 });
     this.nozzleRim = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.02, 8, 16), nozzleMat);
     this.nozzleRim.rotation.x = Math.PI / 2;
     this.nozzleRim.position.y = 1.3;
     this.group.add(this.nozzleRim);
 
-    // Eruption Flare Core (glowing incandescent flame at apex)
     const flareMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
@@ -226,8 +222,9 @@ export class Cracker {
   }
 
   buildFuse(startPos, height, curve) {
+    this.fuseStartPos = startPos.clone();
     const points = [];
-    const segments = 6;
+    const segments = 8;
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
       points.push(new THREE.Vector3(
@@ -237,12 +234,23 @@ export class Cracker {
       ));
     }
 
-    const curvePath = new THREE.CatmullRomCurve3(points);
-    const tubeGeo = new THREE.TubeGeometry(curvePath, 10, 0.025, 6, false);
-    const fuseMat = new THREE.MeshStandardMaterial({ color: 0xa1887f, roughness: 0.9 });
+    this.originalFuseCurve = new THREE.CatmullRomCurve3(points);
+
+    const tubeGeo = new THREE.TubeGeometry(this.originalFuseCurve, 12, 0.024, 6, false);
+    const fuseMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63, roughness: 0.9 });
 
     this.fuseMesh = new THREE.Mesh(tubeGeo, fuseMat);
     this.group.add(this.fuseMesh);
+
+    // Glowing Ember Spark node traveling along the fuse string
+    const emberMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      blending: THREE.AdditiveBlending
+    });
+    this.fuseEmberMesh = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), emberMat);
+    this.fuseEmberMesh.visible = false;
+    this.group.add(this.fuseEmberMesh);
+
     this.localFuseTip = points[points.length - 1].clone();
   }
 
@@ -267,8 +275,12 @@ export class Cracker {
     if (this.state !== 'idle') return false;
     this.state = 'sizzling';
     this.sizzleTime = 0;
+    this.sizzleDuration = 1.35;
     this.auraMat.color.setHex(0xff3300);
     this.auraMat.opacity = 1.0;
+    if (this.fuseEmberMesh) {
+      this.fuseEmberMesh.visible = true;
+    }
     return true;
   }
 
@@ -276,9 +288,12 @@ export class Cracker {
     this.state = 'performing';
     this.performTime = 0;
 
-    // Hide burnt fuse
+    // String has completely burned into the cracker!
     if (this.fuseMesh) {
       this.fuseMesh.visible = false;
+    }
+    if (this.fuseEmberMesh) {
+      this.fuseEmberMesh.visible = false;
     }
 
     switch (this.type) {
@@ -327,6 +342,8 @@ export class Cracker {
     this.state = 'burnt';
     this.auraMat.opacity = 0;
     if (this.nozzleFlare) this.nozzleFlare.visible = false;
+    if (this.fuseMesh) this.fuseMesh.visible = false;
+    if (this.fuseEmberMesh) this.fuseEmberMesh.visible = false;
     this.group.traverse(child => {
       if (child.isMesh && child.material) {
         child.material = child.material.clone();
@@ -341,18 +358,52 @@ export class Cracker {
   }
 
   update(delta, callbacks = {}) {
-    // 1. Sizzling Phase
+    // 1. Sizzling Phase - String slowly burns down from tip into the cracker!
     if (this.state === 'sizzling') {
       this.sizzleTime += delta;
-      const progress = Math.min(1.0, this.sizzleTime / this.sizzleDuration);
+      const burnProgress = Math.min(1.0, this.sizzleTime / this.sizzleDuration);
+      const remainingT = Math.max(0.001, 1.0 - burnProgress);
 
+      // Current burning tip traveling down along the curve from 1.0 to 0.0
+      const currentLocalTip = this.originalFuseCurve.getPoint(remainingT);
+      this.localFuseTip.copy(currentLocalTip);
+
+      // Position the glowing ember at the burning tip
+      if (this.fuseEmberMesh) {
+        this.fuseEmberMesh.position.copy(currentLocalTip);
+        const flicker = 0.8 + Math.random() * 0.45;
+        this.fuseEmberMesh.scale.setScalar(flicker);
+      }
+
+      // Rebuild the shortened fuse string so the user physically sees the string burn down!
+      if (burnProgress >= 0.97) {
+        if (this.fuseMesh) this.fuseMesh.visible = false;
+        if (this.fuseEmberMesh) this.fuseEmberMesh.visible = false;
+      } else {
+        const subPoints = [];
+        const segs = 6;
+        for (let i = 0; i <= segs; i++) {
+          const t = (i / segs) * remainingT;
+          subPoints.push(this.originalFuseCurve.getPoint(t));
+        }
+        const subCurve = new THREE.CatmullRomCurve3(subPoints);
+        if (this.fuseMesh) {
+          this.fuseMesh.geometry.dispose();
+          this.fuseMesh.geometry = new THREE.TubeGeometry(subCurve, 8, 0.024, 5, false);
+        }
+      }
+
+      // Emit sizzling sparks from the current burning tip world position
       if (callbacks.onSpark) {
-        const sparkPos = this.getFuseWorldPosition();
-        sparkPos.y -= progress * 0.15;
+        const sparkPos = currentLocalTip.clone();
+        this.group.localToWorld(sparkPos);
         callbacks.onSpark(sparkPos);
       }
 
+      // When the burning string reaches the end (t = 0), the cracker bursts!
       if (this.sizzleTime >= this.sizzleDuration) {
+        if (this.fuseMesh) this.fuseMesh.visible = false;
+        if (this.fuseEmberMesh) this.fuseEmberMesh.visible = false;
         return { phase: 'fuse_finished' };
       }
       return null;
@@ -403,26 +454,22 @@ export class Cracker {
           intensity = (1.0 - progress) / 0.18;
         }
 
-        // Glowing red-hot cone
         if (this.potMesh && this.potMesh.material) {
           this.potMesh.material.emissive = new THREE.Color(0xff4400);
           this.potMesh.material.emissiveIntensity = 0.65 * intensity;
         }
 
-        // Apex nozzle flame
         if (this.nozzleFlare) {
           this.nozzleFlare.material.opacity = 0.85 * intensity;
           const flareScale = (0.9 + Math.random() * 0.4) * intensity;
           this.nozzleFlare.scale.set(flareScale, flareScale * 1.6, flareScale);
         }
 
-        // Emit dense, towering golden sparkles!
         if (callbacks.onAnarFountain) {
           const apexPos = this.group.position.clone().add(new THREE.Vector3(0, 1.35, 0));
           callbacks.onAnarFountain(apexPos, Math.max(0.4, intensity * 1.3));
         }
 
-        // Heat vibration
         this.group.position.x = this.pos.x + (Math.random() - 0.5) * 0.02 * intensity;
 
         if (this.performTime >= this.performDuration) {

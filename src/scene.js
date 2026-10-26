@@ -43,7 +43,7 @@ function createDiwaliTableTexture() {
   }
 
   // Inner Mandala Lotus Petals
-  const innerPetals = 10;
+  const innerPetals = 12;
   for (let i = 0; i < innerPetals; i++) {
     const angle = (i / innerPetals) * Math.PI * 2;
     ctx.save();
@@ -51,22 +51,23 @@ function createDiwaliTableTexture() {
     ctx.rotate(angle);
     ctx.fillStyle = 'rgba(0, 180, 160, 0.65)';
     ctx.beginPath();
-    ctx.ellipse(0, 85, 12, 22, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 95, 14, 24, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
 
-  // Center Golden Shubh Diya
-  ctx.fillStyle = '#ffcc00';
+  // Concentric Golden Rings framing the Center Cultural Council Emblem
+  ctx.strokeStyle = 'rgba(255, 215, 0, 0.85)';
+  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.arc(256, 256, 32, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.arc(256, 256, 68, 0, Math.PI * 2);
+  ctx.stroke();
 
-  ctx.fillStyle = '#ffeedd';
-  ctx.font = 'bold 22px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('🪔', 256, 256);
+  ctx.strokeStyle = 'rgba(255, 180, 0, 0.6)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(256, 256, 75, 0, Math.PI * 2);
+  ctx.stroke();
 
   const texture = new THREE.CanvasTexture(canvas);
   return texture;
@@ -157,10 +158,60 @@ export class WorldScene {
     const rim = new THREE.Mesh(new THREE.TorusGeometry(6.65, 0.08, 8, 32), rimMat);
     rim.rotation.x = Math.PI / 2;
     this.tableGroup.add(rim);
+
+    // Cultural Council NIT Trichy Emblem Overlay at Center of Rotating Platform!
+    this.initCenterLogo();
+  }
+
+  initCenterLogo() {
+    // 1. Center Base Disc matching deep maroon palette
+    const discGeo = new THREE.CircleGeometry(1.35, 32);
+    const discMat = new THREE.MeshBasicMaterial({
+      color: 0x22050c,
+      side: THREE.DoubleSide
+    });
+    const disc = new THREE.Mesh(discGeo, discMat);
+    disc.rotation.x = -Math.PI / 2;
+    disc.position.y = 0.015;
+    this.tableGroup.add(disc);
+
+    // 2. High-resolution Cultural Council Logo (Transparent background with radiant metallic gold artwork)
+    const textureLoader = new THREE.TextureLoader();
+    const logoTex = textureLoader.load('/cc-logo-gold.png');
+    logoTex.anisotropy = 4;
+
+    const logoMat = new THREE.MeshBasicMaterial({
+      map: logoTex,
+      transparent: true,
+      opacity: 0.96,
+      side: THREE.DoubleSide
+    });
+    const logoMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 2.5), logoMat);
+    logoMesh.rotation.x = -Math.PI / 2;
+    logoMesh.position.y = 0.022; // Layered cleanly on top of the disc
+    this.tableGroup.add(logoMesh);
+
+    // 3. Concentric Golden Ornamental Rims framing the insignia
+    const outerRingGeo = new THREE.RingGeometry(1.32, 1.39, 36);
+    const goldRingMat = new THREE.MeshStandardMaterial({
+      color: 0xffd700,
+      metalness: 0.85,
+      roughness: 0.25,
+      side: THREE.DoubleSide
+    });
+    const outerRing = new THREE.Mesh(outerRingGeo, goldRingMat);
+    outerRing.rotation.x = -Math.PI / 2;
+    outerRing.position.y = 0.025;
+    this.tableGroup.add(outerRing);
+
+    const innerRingGeo = new THREE.RingGeometry(1.23, 1.27, 36);
+    const innerRing = new THREE.Mesh(innerRingGeo, goldRingMat);
+    innerRing.rotation.x = -Math.PI / 2;
+    innerRing.position.y = 0.025;
+    this.tableGroup.add(innerRing);
   }
 
   initDiyas() {
-    // 14 Clay Diyas arranged around the perimeter with wiggling, dancing flame cores!
     const count = 14;
     const radius = 5.8;
     const diyaMat = new THREE.MeshStandardMaterial({ color: 0xd97724, roughness: 0.7 });
@@ -287,7 +338,7 @@ export class WorldScene {
   }
 
   update(delta) {
-    // 1. Slow & majestic ground platform rotation (~140s per full 360 turn)
+    // 1. Slow & majestic ground platform rotation
     if (this.tableGroup) {
       this.tableGroup.rotation.y += 0.045 * delta;
     }
@@ -296,13 +347,11 @@ export class WorldScene {
     const now = performance.now() * 0.001;
     if (this.diyaFlames) {
       this.diyaFlames.forEach(f => {
-        // Organic sway / wiggle
         const swayZ = Math.sin(now * f.speed + f.phase) * 0.18 + Math.sin(now * (f.speed * 1.7) + f.phase) * 0.06;
         const swayX = Math.cos(now * (f.speed * 0.8) + f.phase) * 0.12;
         f.group.rotation.z = swayZ;
         f.group.rotation.x = swayX;
 
-        // Dynamic flicker scale
         const scaleY = 1.0 + Math.sin(now * (f.speed * 1.5) + f.phase) * 0.16;
         const scaleXZ = 1.0 + Math.cos(now * f.speed + f.phase) * 0.09;
         f.group.scale.set(scaleXZ, scaleY, scaleXZ);

@@ -65,6 +65,20 @@ body, html {
   flex-direction: column;
 }
 
+.brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-cc-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: invert(1) brightness(1.8) drop-shadow(0 0 10px rgba(255, 215, 0, 0.75));
+  flex-shrink: 0;
+}
+
 .brand-title h1 {
   font-family: 'Rozha One', 'Yatra One', 'Cinzel', serif;
   font-size: 1.85rem;
@@ -889,6 +903,15 @@ body, html {
   .top-bar {
     padding: max(0.6rem, env(safe-area-inset-top, 0.6rem)) 0.85rem 0.4rem 0.85rem;
     align-items: flex-start;
+  }
+
+  .brand-title-row {
+    gap: 0.45rem;
+  }
+
+  .header-cc-logo {
+    width: 32px;
+    height: 32px;
   }
 
   .brand-title h1 {
