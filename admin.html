@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0612">
+  <title>👑 Admin Control Panel • Diwali Celebration 2026</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #f8c045;
+      --gold-glow: rgba(248, 192, 69, 0.45);
+      --bg-dark: #0a0612;
+      --card-bg: rgba(20, 14, 30, 0.88);
+      --card-border: rgba(248, 192, 69, 0.25);
+      --accent-red: #ff3344;
+      --accent-green: #00e676;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: radial-gradient(circle at 50% 20%, #1e0d2b 0%, #0a0512 80%);
+      font-family: 'Outfit', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .admin-container {
+      max-width: 900px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    header.admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .header-title h1 {
+      font-family: 'Rozha One', serif;
+      font-size: 1.85rem;
+      background: linear-gradient(135deg, #fff 10%, var(--gold) 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+    .header-title p {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .back-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--gold);
+      padding: 0.6rem 1.2rem;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      background: rgba(248, 192, 69, 0.15);
+      border-color: #ffd700;
+      transform: translateY(-2px);
+    }
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.2rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 700;
+    }
+    .stat-value {
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: var(--gold);
+    }
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.8rem;
+    }
+    .panel-header h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .form-group input, .form-group select {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 0.85rem 1.1rem;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .action-btn {
+      background: linear-gradient(135deg, #ffb300, #ff8f00);
+      color: #1a0f00;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1.3rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--gold-glow);
+    }
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 12px;
+      padding: 0.75rem 1.3rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      transform: translateY(-2px);
+    }
+    .danger-btn {
+      background: rgba(255, 51, 68, 0.15);
+      border: 1px solid rgba(255, 51, 68, 0.45);
+      color: #ff5566;
+      border-radius: 12px;
+      padding: 0.75rem 1.3rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .danger-btn:hover {
+      background: rgba(255, 51, 68, 0.3);
+      border-color: #ff3344;
+      color: #fff;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table.claims-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    table.claims-table th, table.claims-table td {
+      padding: 0.8rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    table.claims-table th {
+      color: var(--gold);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .badge.active { background: rgba(0, 230, 118, 0.2); color: #00e676; border: 1px solid #00e676; }
+    .badge.locked { background: rgba(255, 51, 68, 0.2); color: #ff5566; border: 1px solid #ff3344; }
+    .toast-msg {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: rgba(20, 14, 30, 0.95);
+      border: 1px solid var(--gold);
+      color: #fff;
+      padding: 0.8rem 1.6rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px var(--gold-glow);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    .toast-msg.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    /* PIN Prompt Overlay */
+    #pin-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 4, 12, 0.92);
+      backdrop-filter: blur(14px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      z-index: 999;
+    }
+    .pin-box {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 24px;
+      padding: 2.2rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+    .pin-box h2 {
+      font-family: 'Rozha One', serif;
+      font-size: 1.7rem;
+      color: var(--gold);
+    }
+    .pin-box p {
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.75);
+    }
+    .pin-input {
+      font-size: 1.4rem;
+      letter-spacing: 8px;
+      text-align: center;
+      padding: 0.8rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #fff;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Admin PIN Verification Overlay -->
+  <div id="pin-overlay">
+    <div class="pin-box">
+      <h2>👑 Admin Authorization</h2>
+      <p>Enter the coordinator PIN to access Diwali celebration settings.<br><small style="color:var(--gold);">(Default PIN: <b>1234</b>)</small></p>
+      <input type="password" id="pin-input" class="pin-input" placeholder="••••" maxlength="6" autofocus>
+      <button id="unlock-btn" class="action-btn" style="justify-content:center; width:100%;">
+        <span>Unlock Panel</span>
+      </button>
+      <a href="index.html" class="secondary-btn" style="justify-content:center; width:100%;">Cancel &amp; Return</a>
+    </div>
+  </div>
+
+  <div class="admin-container">
+    <header class="admin-header">
+      <div class="header-title">
+        <h1>👑 Diwali Coordinator Dashboard</h1>
+        <p>Cultural Council • Manage Google Form link, participant claims, and lottery rules</p>
+      </div>
+      <a href="index.html" class="back-btn">
+        <span>← Back to 3D Diwali App</span>
+      </a>
+    </header>
+
+    <!-- Top Statistics Overview -->
+    <div class="grid-stats">
+      <div class="stat-card">
+        <span class="stat-label">Device Lock Status</span>
+        <div id="stat-lock-status" class="stat-value" style="font-size:1.4rem;">Unclaimed</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Active Ticket Code</span>
+        <div id="stat-ticket-code" class="stat-value" style="font-size:1.3rem;">None</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Cracker Chosen</span>
+        <div id="stat-cracker-name" class="stat-value" style="font-size:1.3rem;">None</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Auto-Redirect</span>
+        <div id="stat-countdown" class="stat-value" style="font-size:1.4rem;">8 Seconds</div>
+      </div>
+    </div>
+
+    <!-- 1. Google Forms Redirection Settings -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <h2>📝 Google Forms Redirection Link</h2>
+        <span class="badge active">Live Integration</span>
+      </div>
+      <p style="font-size:0.88rem; color:rgba(255,255,255,0.75);">
+        When participants burst a cracker and win their Diwali ticket, they are automatically redirected to this form to claim it.
+      </p>
+      <div class="form-group">
+        <label for="admin-form-url">Official Google Form URL:</label>
+        <input type="url" id="admin-form-url" placeholder="https://docs.google.com/forms/d/e/.../viewform">
+      </div>
+      <div class="btn-row">
+        <button id="save-form-url-btn" class="action-btn">
+          <span>💾 Save &amp; Update Live Form</span>
+        </button>
+        <button id="test-form-url-btn" class="secondary-btn">
+          <span>🔗 Test Link (Open Form)</span>
+        </button>
+        <button id="reset-default-url-btn" class="secondary-btn">
+          <span>↩ Reset to Default</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Fraud Prevention & Kiosk Resets -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <h2>🔒 Fraud Prevention &amp; Device Lock Controls</h2>
+        <span class="badge locked">1 Burst Per Device</span>
+      </div>
+      <p style="font-size:0.88rem; color:rgba(255,255,255,0.75);">
+        The algorithm locks the participant after bursting 1 cracker so they cannot fake or retry. If managing a shared kiosk/stall, use the buttons below to reset the lock between students.
+      </p>
+      <div class="btn-row">
+        <button id="clear-claim-btn" class="action-btn" style="background:linear-gradient(135deg, #00e676, #00b0ff); color:#000;">
+          <span>⚡ Reset Claim (Allow 1 More Burst)</span>
+        </button>
+        <button id="simulate-claim-btn" class="secondary-btn">
+          <span>🎟️ Generate Sample Ticket Claim</span>
+        </button>
+        <button id="wipe-all-storage-btn" class="danger-btn">
+          <span>🗑️ Clear All Diwali Local Data</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Ticket Verification Tool -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <h2>🔍 Participant Ticket Verification (Bay 0 Counter)</h2>
+      </div>
+      <p style="font-size:0.88rem; color:rgba(255,255,255,0.75);">
+        Verify whether a student's shown ticket code matches this device's recorded claim:
+      </p>
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+        <input type="text" id="verify-input" placeholder="#DIWALI-XXXXX" style="flex:1; min-width:200px; padding:0.75rem 1rem; border-radius:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#fff; font-size:1rem; outline:none;">
+        <button id="verify-btn" class="action-btn">
+          <span>Verify Ticket</span>
+        </button>
+      </div>
+      <div id="verify-result" style="font-size:0.95rem; font-weight:700; padding:0.6rem 0;"></div>
+    </div>
+
+    <!-- 4. Device Claim Records -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <h2>📜 Active Device Claim Record</h2>
+      </div>
+      <div class="table-container">
+        <table class="claims-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Ticket Code</th>
+              <th>Cracker Burst</th>
+              <th>Claim Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="claims-table-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast-msg">Settings saved!</div>
+
+  <script>
+    const STORAGE_CLAIM_KEY = 'diwali_cracker_stunt_claim_v1';
+    const DEFAULT_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScXQ_SAMPLE_TICKET_CLAIM/viewform';
+    const CORRECT_PIN = '1234';
+
+    // PIN Authentication
+    const pinOverlay = document.getElementById('pin-overlay');
+    const pinInput = document.getElementById('pin-input');
+    const unlockBtn = document.getElementById('unlock-btn');
+
+    if (sessionStorage.getItem('diwali_admin_authenticated') === 'true') {
+      pinOverlay.style.display = 'none';
+    }
+
+    const checkPin = () => {
+      if (pinInput.value.trim() === CORRECT_PIN) {
+        sessionStorage.setItem('diwali_admin_authenticated', 'true');
+        pinOverlay.style.display = 'none';
+        showToast('Access Granted • Welcome Admin!');
+      } else {
+        alert('Incorrect Admin PIN. Please try again (Default: 1234)');
+        pinInput.value = '';
+        pinInput.focus();
+      }
+    };
+
+    unlockBtn.addEventListener('click', checkPin);
+    pinInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkPin();
+    });
+
+    // Form URL handling
+    const formUrlInput = document.getElementById('admin-form-url');
+    const saveFormBtn = document.getElementById('save-form-url-btn');
+    const testFormBtn = document.getElementById('test-form-url-btn');
+    const resetFormBtn = document.getElementById('reset-default-url-btn');
+
+    const loadFormUrl = () => {
+      const saved = localStorage.getItem('diwali_forms_url') || DEFAULT_FORM_URL;
+      formUrlInput.value = saved;
+    };
+    loadFormUrl();
+
+    saveFormBtn.addEventListener('click', () => {
+      const url = formUrlInput.value.trim();
+      if (!url) {
+        alert('Please enter a valid URL.');
+        return;
+      }
+      localStorage.setItem('diwali_forms_url', url);
+      showToast('✅ Google Form URL successfully updated!');
+    });
+
+    testFormBtn.addEventListener('click', () => {
+      const url = formUrlInput.value.trim() || DEFAULT_FORM_URL;
+      window.open(url, '_blank');
+    });
+
+    resetFormBtn.addEventListener('click', () => {
+      if (confirm('Reset Google Form link to default sample URL?')) {
+        localStorage.removeItem('diwali_forms_url');
+        formUrlInput.value = DEFAULT_FORM_URL;
+        showToast('Reset to default URL');
+      }
+    });
+
+    // Device Claim Stats & Table
+    const statLockStatus = document.getElementById('stat-lock-status');
+    const statTicketCode = document.getElementById('stat-ticket-code');
+    const statCrackerName = document.getElementById('stat-cracker-name');
+    const claimsTableBody = document.getElementById('claims-table-body');
+
+    const updateDisplay = () => {
+      let claim = null;
+      try {
+        const raw = localStorage.getItem(STORAGE_CLAIM_KEY);
+        if (raw) claim = JSON.parse(raw);
+      } catch (e) {}
+
+      if (claim && claim.hasBurst) {
+        statLockStatus.textContent = '🔒 Locked';
+        statLockStatus.style.color = '#ff5566';
+        statTicketCode.textContent = claim.ticketCode;
+        statCrackerName.textContent = claim.crackerName;
+
+        const dateStr = new Date(claim.timestamp).toLocaleString();
+        claimsTableBody.innerHTML = `
+          <tr>
+            <td><span class="badge locked">Locked</span></td>
+            <td><b>${claim.ticketCode}</b></td>
+            <td>${claim.crackerName}</td>
+            <td>${dateStr}</td>
+          </tr>
+        `;
+      } else {
+        statLockStatus.textContent = '🔓 Ready to Burst';
+        statLockStatus.style.color = '#00e676';
+        statTicketCode.textContent = 'None';
+        statCrackerName.textContent = 'None';
+
+        claimsTableBody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align:center; color:rgba(255,255,255,0.5); padding:1.5rem;">
+              No claims recorded on this device yet. Ready for first participant!
+            </td>
+          </tr>
+        `;
+      }
+    };
+    updateDisplay();
+
+    // Reset Controls
+    const clearClaimBtn = document.getElementById('clear-claim-btn');
+    clearClaimBtn.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_CLAIM_KEY);
+      updateDisplay();
+      showToast('⚡ Device unlocked! 1 more burst allowed now.');
+    });
+
+    const simulateClaimBtn = document.getElementById('simulate-claim-btn');
+    simulateClaimBtn.addEventListener('click', () => {
+      const sample = {
+        hasBurst: true,
+        ticketCode: '#DIWALI-' + Math.floor(10000 + Math.random() * 90000),
+        crackerName: 'Royal Golden Anar',
+        crackerId: 'flowerpot',
+        timestamp: Date.now()
+      };
+      localStorage.setItem(STORAGE_CLAIM_KEY, JSON.stringify(sample));
+      updateDisplay();
+      showToast(`🎟️ Created claim: ${sample.ticketCode}`);
+    });
+
+    const wipeAllBtn = document.getElementById('wipe-all-storage-btn');
+    wipeAllBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear ALL Diwali data including custom Google Form link and claim records?')) {
+        localStorage.removeItem(STORAGE_CLAIM_KEY);
+        localStorage.removeItem('diwali_forms_url');
+        loadFormUrl();
+        updateDisplay();
+        showToast('All local storage cleared.');
+      }
+    });
+
+    // Verification tool
+    const verifyInput = document.getElementById('verify-input');
+    const verifyBtn = document.getElementById('verify-btn');
+    const verifyResult = document.getElementById('verify-result');
+
+    verifyBtn.addEventListener('click', () => {
+      const code = verifyInput.value.trim().toUpperCase();
+      if (!code) {
+        verifyResult.textContent = '⚠️ Please enter a ticket code.';
+        verifyResult.style.color = '#ffcc00';
+        return;
+      }
+
+      let claim = null;
+      try {
+        const raw = localStorage.getItem(STORAGE_CLAIM_KEY);
+        if (raw) claim = JSON.parse(raw);
+      } catch (e) {}
+
+      if (claim && claim.ticketCode.toUpperCase() === code) {
+        verifyResult.innerHTML = `✅ <b>VALID TICKET!</b> Issued for: <i>${claim.crackerName}</i> on this device.`;
+        verifyResult.style.color = '#00e676';
+      } else {
+        verifyResult.innerHTML = `❌ <b>NO MATCH:</b> Ticket code not found on this device cache.`;
+        verifyResult.style.color = '#ff4444';
+      }
+    });
+
+    // Toast notification
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+  </script>
+</body>
+</html>

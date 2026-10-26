@@ -200,7 +200,7 @@ class App {
     // Auto-open admin panel if URL query contains ?admin=true
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('admin') === 'true') {
-      openAdminSettings();
+      window.location.href = 'admin.html';
     }
 
     // Secret Admin Gesture: Triple-click Brand Title opens Admin Menu
@@ -211,12 +211,12 @@ class App {
         titleClickCount++;
         if (titleClickCount >= 3) {
           titleClickCount = 0;
-          const choice = prompt("👑 DIWALI ADMIN PANEL:\nType '1' to Change Google Form Link\nType '2' to Reset Participant Cache (Test Again)\nType 'cancel' to exit:", "1");
+          const choice = prompt("👑 DIWALI ADMIN PANEL:\nType '1' to Open Full Admin Dashboard (/admin.html)\nType '2' to Reset Device Claim Lock (Allow 1 More Burst)\nType 'cancel' to exit:", "1");
           if (choice === '1') {
-            openAdminSettings();
+            window.location.href = 'admin.html';
           } else if (choice === '2') {
             localStorage.removeItem(STORAGE_CLAIM_KEY);
-            alert("Cache cleared! Page will reload.");
+            alert("Lock reset! You can now burst another cracker.");
             window.location.reload();
           }
         }
