@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+
+# Netlify local cache
+.netlify/
+
+# Local archives
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db

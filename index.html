@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0612">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>🪔 Diwali Celebration - The Grand Diwali Dhamaka 🪔</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>🪔</text></svg>">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- UI Overlay -->
+  <div class="ui-layer">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="brand-title">
+        <h1>🪔 CULTURAL COUNCIL 🪔</h1>
+        <p>Diwali Celebration • Drag the candle to light ONE cracker. Choose wisely!</p>
+      </div>
+      <div class="top-actions">
+        <button id="schedule-btn" class="icon-btn" title="View Event Schedule">
+          <span>📅</span>
+          <span>Schedule</span>
+        </button>
+        <button id="sound-btn" class="icon-btn" title="Toggle Sound">
+          <span id="sound-icon">🔊</span>
+          <span id="sound-text">Sound: ON</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Floating Instruction Toast -->
+    <div id="instruction-toast" class="instruction-toast">
+      <span class="badge">Diwali Rule</span>
+      <span>Click &amp; drag the <b>candle</b> to any cracker's fuse (or tap a cracker). You can only burst <b>ONE</b>!</span>
+    </div>
+
+    <!-- Persistent Claimed Ticket Banner (Shows when coming back to screen) -->
+    <div id="claimed-floating-card" class="claimed-floating-card">
+      <div class="claimed-card-left">
+        <span class="claimed-icon">🎟️</span>
+        <div class="claimed-info">
+          <div class="claimed-title">Diwali Ticket Claimed!</div>
+          <div class="claimed-code"><span id="banner-ticket-code">#DIWALI-88492</span> • 🔒 Locked (1 Burst Limit)</div>
+        </div>
+      </div>
+      <button id="view-ticket-banner-btn" class="claimed-view-btn">View Ticket / Form ➔</button>
+    </div>
+
+    <!-- Bottom Status Indicator -->
+    <div class="bottom-status-container">
+      <div id="status-pill" class="status-pill">
+        <span class="pulse-dot"></span>
+        <span id="status-text">Drag the candle or tap any cracker to burst it</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rigged Reward Modal -->
+  <div id="reward-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button id="close-modal-x-btn" class="close-x-btn" title="Back to main screen">&times;</button>
+      <div class="modal-header">
+        <div class="burst-tag">💥 SHUBH DIWALI DHAMAKA! 💥</div>
+        <h2>CONGRATULATIONS!</h2>
+        <p>Happy Diwali! The festive algorithm has picked your ultimate Diwali reward!</p>
+      </div>
+
+      <!-- The Rigged Prize: Always A Ticket -->
+      <div class="ticket-wrapper">
+        <div class="golden-ticket">
+          <div class="ticket-sheen"></div>
+          <div class="ticket-inner">
+            <div class="ticket-details">
+              <span class="ticket-tag">★ OFFICIAL DIWALI VIP PASS ★</span>
+              <div class="ticket-title">🎟️ YOU WON A TICKET!</div>
+              <div class="ticket-subtitle">Exclusive Grand Diwali Lucky Draw Entry Pass</div>
+            </div>
+            <div class="ticket-barcode-box">
+              <div class="barcode-lines">||||| | ||| || |||</div>
+              <div class="ticket-code">#DIWALI-88492</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rigged Reveal: What You COULD Have Won -->
+      <div class="rigged-section">
+        <div class="rigged-title-bar">
+          <h3>👀 What else was inside this Diwali cracker:</h3>
+          <span class="rigged-badge">So Close!</span>
+        </div>
+        <div class="prizes-grid">
+          <div class="prize-card">
+            <div class="prize-icon">🍿</div>
+            <div class="prize-name">Free Popcorn</div>
+            <div class="prize-value">Jumbo Butter Tub</div>
+            <div class="missed-stamp">MISSED!</div>
+          </div>
+          <div class="prize-card">
+            <div class="prize-icon">🌟</div>
+            <div class="prize-name">Bay 0 Access</div>
+            <div class="prize-value">VIP Lounge &amp; Stage</div>
+            <div class="missed-stamp">MISSED!</div>
+          </div>
+          <div class="prize-card">
+            <div class="prize-icon">🎟️</div>
+            <div class="prize-name">₹200 Stall Coupon</div>
+            <div class="prize-value">All Food Stalls</div>
+            <div class="missed-stamp">MISSED!</div>
+          </div>
+          <div class="prize-card">
+            <div class="prize-icon">🍔</div>
+            <div class="prize-name">Free Food Combo</div>
+            <div class="prize-value">Meal + Cold Drink</div>
+            <div class="missed-stamp">MISSED!</div>
+          </div>
+          <div class="prize-card">
+            <div class="prize-icon">👕</div>
+            <div class="prize-name">Diwali Fest Hoodie</div>
+            <div class="prize-value">Exclusive Merch Drop</div>
+            <div class="missed-stamp">MISSED!</div>
+          </div>
+          <div class="prize-card">
+            <div class="prize-icon">🎮</div>
+            <div class="prize-name">Gaming Zone Pass</div>
+            <div class="prize-value">VR &amp; Console Arena</div>
+            <div class="missed-stamp">MISSED!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Redirection to Google Forms -->
+      <div class="redirect-bar">
+        <div class="redirect-countdown-box">
+          <span>⏳ Redirecting to Diwali Form in <b id="countdown-val">8</b>s to claim...</span>
+          <button id="pause-redirect-btn" class="pause-btn">Pause Redirect</button>
+        </div>
+        <div class="modal-primary-actions">
+          <a id="claim-ticket-btn" href="#" target="_blank" class="primary-btn">
+            <span>🪔 Claim Your Diwali Ticket on Google Forms</span>
+            <span>➔</span>
+          </a>
+          <button id="back-to-screen-btn" class="return-main-btn">
+            <span>← Back to Main Screen (Burst Another Cracker)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Schedule Modal -->
+  <div id="schedule-modal" class="modal-overlay">
+    <div class="schedule-content">
+      <button id="close-schedule-x-btn" class="close-x-btn" title="Close schedule">&times;</button>
+      <div class="schedule-header">
+        <div class="burst-tag" style="background: linear-gradient(135deg, #ff9900, #ff5500);">📅 DIWALI CELEBRATION 2026</div>
+        <h2>EVENT SCHEDULE</h2>
+        <p>Presented by the Cultural Council</p>
+      </div>
+
+      <div class="timeline-list">
+        <div class="timeline-item">
+          <div class="timeline-time">05:00 PM</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-body">
+            <h4>🪔 Diya Lighting &amp; Rangoli Showcase</h4>
+            <p>Welcome ceremony &amp; lamp lighting at Central Courtyard</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">06:00 PM</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-body">
+            <h4>🎭 Cultural Council Live Performances</h4>
+            <p>Music, classical dance &amp; drama show at Main Stage</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">07:15 PM</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-body">
+            <h4>🍿 Food Stalls &amp; Snack Arcade Open</h4>
+            <p>Food Street active • Use ₹200 coupons &amp; grab popcorn!</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">08:30 PM</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-body">
+            <h4>💥 Grand Cracker &amp; Light Show</h4>
+            <p>Eco-friendly festive cracker &amp; drone celebration</p>
+          </div>
+        </div>
+        <div class="timeline-item highlight">
+          <div class="timeline-time">09:15 PM</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-body">
+            <h4>🎟️ Mega Lucky Draw &amp; Ticket Redemption</h4>
+            <p>Bay 0 Stage • Claim your ticket &amp; announce lucky winners!</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-time">09:45 PM</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-body">
+            <h4>🎧 DJ Night &amp; Diwali Jam</h4>
+            <p>Open dance floor &amp; musical night celebration</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-primary-actions" style="margin-top:0.5rem;">
+        <button id="close-schedule-btn" class="primary-btn" style="padding:0.8rem 1.4rem; font-size:0.95rem;">
+          <span>Back to Crackers</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings / Google Form URL Config Modal -->
+  <div id="settings-modal" class="settings-modal-overlay">
+    <div class="settings-box">
+      <h3>⚙️ Google Forms Redirection Link</h3>
+      <p>Enter the Google Forms URL where users will be redirected to claim their Diwali ticket. This link is saved in your browser.</p>
+      <div class="input-group">
+        <label for="form-url-input">Google Forms URL:</label>
+        <input type="url" id="form-url-input" placeholder="https://docs.google.com/forms/d/e/.../viewform" required>
+      </div>
+      <div class="settings-actions">
+        <button id="cancel-settings-btn" class="icon-btn" style="border-radius:10px;">Cancel</button>
+        <button id="save-settings-btn" class="primary-btn" style="padding:0.6rem 1.4rem; border-radius:10px; font-size:0.9rem;">Save Link</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
