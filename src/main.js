@@ -418,7 +418,8 @@ class App {
       if (c !== cracker) c.lock();
     });
 
-    this.candle.setDraggable(false);
+    // Smoothly fade out the candle once the cracker is lit!
+    this.candle.fadeOut();
     soundEngine.startSizzle();
     this.statusText.textContent = `🔥 ${cracker.name} fuse is sizzling! STAND BACK!`;
     this.instructionToast.classList.add('hidden');

@@ -80,7 +80,7 @@ export class Cracker {
     this.sizzleTime = 0;
     this.sizzleDuration = 1.0;
 
-    // Cracker performance state
+    // Performance states
     this.performTime = 0;
     this.performDuration = 1.0;
     this.spinAngle = 0;
@@ -144,6 +144,17 @@ export class Cracker {
     this.nozzleRim.rotation.x = Math.PI / 2;
     this.nozzleRim.position.y = 1.3;
     this.group.add(this.nozzleRim);
+
+    // Eruption Flare Core (glowing incandescent flame at apex)
+    const flareMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending
+    });
+    this.nozzleFlare = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.45, 10), flareMat);
+    this.nozzleFlare.position.y = 1.45;
+    this.group.add(this.nozzleFlare);
 
     this.buildFuse(new THREE.Vector3(0, 1.3, 0), 0.45, 0.1);
   }
@@ -276,7 +287,11 @@ export class Cracker {
         this.rocketSpeed = 1.2;
         break;
       case 'flowerpot':
-        this.performDuration = 2.4;
+        this.performDuration = 2.5;
+        if (this.nozzleFlare) {
+          this.nozzleFlare.visible = true;
+          this.nozzleFlare.material.opacity = 0.95;
+        }
         break;
       case 'chakri':
         this.performDuration = 2.2;
@@ -290,7 +305,7 @@ export class Cracker {
         break;
       case 'bomb':
       default:
-        this.performDuration = 0.26; // Suspense pause before blast!
+        this.performDuration = 0.26;
         break;
     }
   }
@@ -311,6 +326,7 @@ export class Cracker {
   setBurntState() {
     this.state = 'burnt';
     this.auraMat.opacity = 0;
+    if (this.nozzleFlare) this.nozzleFlare.visible = false;
     this.group.traverse(child => {
       if (child.isMesh && child.material) {
         child.material = child.material.clone();
@@ -324,9 +340,8 @@ export class Cracker {
     this.scene.remove(this.group);
   }
 
-  // Called each frame from main animation loop
   update(delta, callbacks = {}) {
-    // 1. Sizzling Phase (fuse sparks)
+    // 1. Sizzling Phase
     if (this.state === 'sizzling') {
       this.sizzleTime += delta;
       const progress = Math.min(1.0, this.sizzleTime / this.sizzleDuration);
@@ -351,20 +366,17 @@ export class Cracker {
       // AAKASH GANGA ROCKET
       // ----------------------------------------
       if (this.type === 'rocket') {
-        this.rocketSpeed += 19.0 * delta; // Accelerate upward!
+        this.rocketSpeed += 19.0 * delta;
         this.group.position.y += this.rocketSpeed * delta;
 
-        // Slight flight wobble
         this.group.rotation.z = -0.1 + Math.sin(this.performTime * 35) * 0.04;
         this.group.rotation.x = Math.cos(this.performTime * 30) * 0.03;
 
-        // Tail jet sparks
         if (callbacks.onRocketThrust) {
           const nozzlePos = this.group.position.clone().add(new THREE.Vector3(0, 0.4, 0));
           callbacks.onRocketThrust(nozzlePos);
         }
 
-        // Sky apex reached!
         if (this.performTime >= this.performDuration || this.group.position.y >= 8.2) {
           const skyBurstPos = this.group.position.clone();
           this.burst();
@@ -384,28 +396,34 @@ export class Cracker {
       if (this.type === 'flowerpot') {
         const progress = this.performTime / this.performDuration;
 
-        // Intensity bell curve: swells quickly, sustains, then pops
         let intensity = 1.0;
-        if (this.performTime < 0.4) {
-          intensity = this.performTime / 0.4;
-        } else if (progress > 0.85) {
-          intensity = (1.0 - progress) / 0.15;
+        if (this.performTime < 0.35) {
+          intensity = this.performTime / 0.35;
+        } else if (progress > 0.82) {
+          intensity = (1.0 - progress) / 0.18;
         }
 
-        // Pot cone glows red-hot with intense heat
+        // Glowing red-hot cone
         if (this.potMesh && this.potMesh.material) {
           this.potMesh.material.emissive = new THREE.Color(0xff4400);
-          this.potMesh.material.emissiveIntensity = 0.5 * intensity;
+          this.potMesh.material.emissiveIntensity = 0.65 * intensity;
         }
 
-        // Top nozzle spews towering golden fountain
+        // Apex nozzle flame
+        if (this.nozzleFlare) {
+          this.nozzleFlare.material.opacity = 0.85 * intensity;
+          const flareScale = (0.9 + Math.random() * 0.4) * intensity;
+          this.nozzleFlare.scale.set(flareScale, flareScale * 1.6, flareScale);
+        }
+
+        // Emit dense, towering golden sparkles!
         if (callbacks.onAnarFountain) {
           const apexPos = this.group.position.clone().add(new THREE.Vector3(0, 1.35, 0));
-          callbacks.onAnarFountain(apexPos, Math.max(0.3, intensity * 1.25));
+          callbacks.onAnarFountain(apexPos, Math.max(0.4, intensity * 1.3));
         }
 
-        // Subtle vibration
-        this.group.position.x = this.pos.x + Math.sin(this.performTime * 60) * 0.012;
+        // Heat vibration
+        this.group.position.x = this.pos.x + (Math.random() - 0.5) * 0.02 * intensity;
 
         if (this.performTime >= this.performDuration) {
           this.setBurntState();
@@ -423,7 +441,6 @@ export class Cracker {
       // ZAMIN CHAKRI WHEEL
       // ----------------------------------------
       if (this.type === 'chakri') {
-        // Accelerate spin speed
         this.spinSpeed = Math.min(48, this.spinSpeed + 35 * delta);
         this.spinAngle += this.spinSpeed * delta;
 
@@ -431,13 +448,11 @@ export class Cracker {
           this.discMesh.rotation.y = this.spinAngle;
         }
 
-        // Small organic spiral drift on table
         const driftRadius = Math.sin((this.performTime / this.performDuration) * Math.PI) * 0.4;
         const driftAngle = this.performTime * 4.2;
         this.group.position.x = this.pos.x + Math.cos(driftAngle) * driftRadius;
         this.group.position.z = this.pos.z + Math.sin(driftAngle) * driftRadius;
 
-        // Centrifugal tangential sparks
         if (callbacks.onChakriSparks) {
           callbacks.onChakriSparks(this.group.position, this.spinAngle);
         }
@@ -470,7 +485,6 @@ export class Cracker {
             callbacks.onLadiPop(popPos, this.popCount);
           }
 
-          // Cracker jitter
           this.group.position.y = (Math.random() - 0.5) * 0.04;
           this.popCount++;
           this.nextPopTime += 0.08 + Math.random() * 0.07;
@@ -492,7 +506,6 @@ export class Cracker {
       // CLASSIC LAXMI BOMB
       // ----------------------------------------
       if (this.type === 'bomb') {
-        // Dramatic 0.26s suspense pause after fuse disappears into green box
         if (this.performTime >= this.performDuration) {
           const blastPos = this.group.position.clone().add(new THREE.Vector3(0, 0.35, 0));
           this.burst();

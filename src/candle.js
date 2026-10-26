@@ -15,6 +15,10 @@ export class Candle {
     this.canDrag = true;
     this.isLocked = false;
 
+    // Fading state
+    this.isFading = false;
+    this.fadeOpacity = 1.0;
+
     this.dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
@@ -30,13 +34,18 @@ export class Candle {
   }
 
   initModel() {
+    this.materials = [];
+
     const brassMat = new THREE.MeshStandardMaterial({
       color: 0xffcc33,
       metalness: 0.8,
-      roughness: 0.25
+      roughness: 0.25,
+      transparent: true,
+      opacity: 1.0
     });
+    this.materials.push(brassMat);
 
-    // Mobile optimized lower-poly geometry
+    // Brass base plate
     const basePlate = new THREE.Mesh(
       new THREE.CylinderGeometry(0.7, 0.85, 0.12, 16),
       brassMat
@@ -51,11 +60,15 @@ export class Candle {
     collar.position.y = 0.25;
     this.group.add(collar);
 
-    // Candle Stick
+    // Candle Wax Stick
     const waxMat = new THREE.MeshStandardMaterial({
       color: 0xd62828,
-      roughness: 0.4
+      roughness: 0.4,
+      transparent: true,
+      opacity: 1.0
     });
+    this.materials.push(waxMat);
+
     const candleStick = new THREE.Mesh(
       new THREE.CylinderGeometry(0.22, 0.24, 1.6, 16),
       waxMat
@@ -64,29 +77,33 @@ export class Candle {
     this.group.add(candleStick);
 
     // Wick
+    const wickMat = new THREE.MeshBasicMaterial({ color: 0x111111, transparent: true, opacity: 1.0 });
+    this.materials.push(wickMat);
     const wick = new THREE.Mesh(
       new THREE.CylinderGeometry(0.02, 0.02, 0.16, 6),
-      new THREE.MeshBasicMaterial({ color: 0x111111 })
+      wickMat
     );
     wick.position.set(0, 1.9, 0);
     this.group.add(wick);
 
-    // Flame
+    // Flame Group
     this.flameGroup = new THREE.Group();
     this.flameGroup.position.set(0, 2.05, 0);
 
-    const innerMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const innerMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1.0 });
+    this.materials.push(innerMat);
     const innerCone = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.3, 10), innerMat);
     innerCone.position.y = 0.15;
     this.flameGroup.add(innerCone);
 
-    const outerMat = new THREE.MeshBasicMaterial({
+    this.flameOuterMat = new THREE.MeshBasicMaterial({
       color: 0xff8c00,
       transparent: true,
       opacity: 0.85,
       blending: THREE.AdditiveBlending
     });
-    this.flameOuter = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.45, 10), outerMat);
+    this.materials.push(this.flameOuterMat);
+    this.flameOuter = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.45, 10), this.flameOuterMat);
     this.flameOuter.position.y = 0.22;
     this.flameGroup.add(this.flameOuter);
 
@@ -100,6 +117,8 @@ export class Candle {
       transparent: true,
       opacity: 0.45
     });
+    this.materials.push(this.ringMat);
+
     this.targetRing = new THREE.Mesh(ringGeo, this.ringMat);
     this.targetRing.rotation.x = -Math.PI / 2;
     this.targetRing.position.y = 0.02;
@@ -120,7 +139,7 @@ export class Candle {
     };
 
     const onPointerDown = (e) => {
-      if (!this.canDrag || this.isLocked) return;
+      if (!this.canDrag || this.isLocked || this.isFading) return;
       const p = getPointerPos(e);
       this.mouse.set(p.x, p.y);
 
@@ -138,7 +157,7 @@ export class Candle {
     };
 
     const onPointerMove = (e) => {
-      if (this.isLocked) return;
+      if (this.isLocked || this.isFading) return;
       const p = getPointerPos(e);
       this.mouse.set(p.x, p.y);
 
@@ -180,7 +199,7 @@ export class Candle {
   }
 
   moveToPosition(x, z) {
-    if (this.isLocked) return;
+    if (this.isLocked || this.isFading) return;
     this.targetPos.x = x;
     this.targetPos.z = z;
     soundEngine.playWhoosh(0.8);
@@ -195,15 +214,29 @@ export class Candle {
     }
   }
 
+  fadeOut() {
+    this.isFading = true;
+    this.canDrag = false;
+    this.isDragging = false;
+    this.domElement.style.cursor = 'default';
+  }
+
   setLockedState(locked) {
     this.isLocked = locked;
     this.canDrag = !locked;
     this.isDragging = false;
-    this.targetRing.visible = !locked;
     if (locked) {
-      this.flameGroup.visible = false; // Extinguish flame when already burst!
+      this.group.visible = false; // Hide completely once claimed/locked
     } else {
-      this.flameGroup.visible = true;
+      this.group.visible = true;
+      this.group.scale.set(1, 1, 1);
+      this.fadeOpacity = 1.0;
+      this.isFading = false;
+      this.materials.forEach(m => {
+        m.opacity = 1.0;
+      });
+      this.flameOuterMat.opacity = 0.85;
+      this.ringMat.opacity = 0.45;
     }
   }
 
@@ -224,6 +257,24 @@ export class Candle {
 
   update(delta) {
     this.time += delta;
+
+    // Smooth fading out after lighting a cracker
+    if (this.isFading) {
+      this.fadeOpacity = Math.max(0, this.fadeOpacity - delta * 2.2);
+      this.currentPos.y -= 1.2 * delta; // Sinks below table
+      this.group.scale.multiplyScalar(Math.max(0.01, 1.0 - delta * 1.8));
+
+      this.materials.forEach(m => {
+        m.opacity = this.fadeOpacity;
+      });
+
+      if (this.fadeOpacity <= 0) {
+        this.group.visible = false;
+        this.isFading = false;
+      }
+    }
+
+    if (!this.group.visible) return;
 
     const targetY = this.isDragging ? 0.3 : 0;
     this.currentPos.y += (targetY - this.currentPos.y) * 12 * delta;
@@ -249,7 +300,7 @@ export class Candle {
     this.group.rotation.x += (targetTiltX - this.group.rotation.x) * 10 * delta;
     this.group.rotation.z += (targetTiltZ - this.group.rotation.z) * 10 * delta;
 
-    if (!this.isLocked) {
+    if (!this.isLocked && !this.isFading) {
       const scaleY = 1.0 + Math.sin(this.time * 16) * 0.08;
       this.flameOuter.scale.set(1.0, scaleY, 1.0);
     }
