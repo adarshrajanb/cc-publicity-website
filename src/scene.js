@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Procedural Diwali Rangoli & Table Texture - generated once
 function createDiwaliTableTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = 512; // Mobile-optimized resolution (512x512)
+  canvas.width = 512;
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
@@ -114,7 +114,11 @@ export class WorldScene {
       console.warn('WebGL context lost, recovering...');
     }, false);
 
-    // 4. Lights & Environment
+    // 4. Rotating Ground Platform Group
+    this.tableGroup = new THREE.Group();
+    this.scene.add(this.tableGroup);
+
+    // 5. Lights & Environment
     this.initLights();
     this.initTable();
     this.initDiyas();
@@ -127,7 +131,6 @@ export class WorldScene {
   }
 
   initLights() {
-    // Only 2 primary lights in the entire scene! 1 Ambient + 1 Directional
     const ambient = new THREE.AmbientLight(0xffeedd, 1.6);
     this.scene.add(ambient);
 
@@ -147,45 +150,67 @@ export class WorldScene {
     const tableGeo = new THREE.CylinderGeometry(6.6, 6.8, 0.35, 32);
     const table = new THREE.Mesh(tableGeo, tableMat);
     table.position.y = -0.18;
-    this.scene.add(table);
+    this.tableGroup.add(table);
 
     // Gold rim
     const rimMat = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.3, metalness: 0.8 });
     const rim = new THREE.Mesh(new THREE.TorusGeometry(6.65, 0.08, 8, 32), rimMat);
     rim.rotation.x = Math.PI / 2;
-    this.scene.add(rim);
+    this.tableGroup.add(rim);
   }
 
   initDiyas() {
-    // Clay Diyas with Emissive materials - 0 extra PointLights!
-    const count = 10;
+    // 14 Clay Diyas arranged around the perimeter with wiggling, dancing flame cores!
+    const count = 14;
     const radius = 5.8;
     const diyaMat = new THREE.MeshStandardMaterial({ color: 0xd97724, roughness: 0.7 });
-    const flameMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
 
     this.diyaFlames = [];
 
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
-      if (Math.sin(angle) > 0.7) continue;
 
       const diya = new THREE.Group();
       diya.position.set(Math.cos(angle) * radius, 0.04, Math.sin(angle) * radius);
 
+      // Clay bowl
       const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.12, 0.12, 12), diyaMat);
       diya.add(bowl);
 
-      const flame = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.18, 6), flameMat);
-      flame.position.set(0, 0.15, 0);
-      diya.add(flame);
+      // Flame container group for wiggling/swaying
+      const flameGroup = new THREE.Group();
+      flameGroup.position.set(0, 0.12, 0);
 
-      this.scene.add(diya);
-      this.diyaFlames.push(flame);
+      // Outer glowing flame
+      const flameOuterMat = new THREE.MeshBasicMaterial({
+        color: 0xff8800,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending
+      });
+      const flameOuter = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.22, 8), flameOuterMat);
+      flameOuter.position.y = 0.11;
+      flameGroup.add(flameOuter);
+
+      // Inner incandescent core
+      const flameInnerMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const flameInner = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.13, 8), flameInnerMat);
+      flameInner.position.y = 0.07;
+      flameGroup.add(flameInner);
+
+      diya.add(flameGroup);
+      this.tableGroup.add(diya);
+
+      this.diyaFlames.push({
+        group: flameGroup,
+        outer: flameOuter,
+        phase: i * 0.75 + Math.random() * 2.0,
+        speed: 8.0 + Math.random() * 4.0
+      });
     }
   }
 
   initHangingLanterns() {
-    // Hanging Diwali paper lanterns with emissive glowing colors
     const lanternColors = [0xff3366, 0xffbb00, 0x00ccaa, 0xff6600];
     const lanternPositions = [
       { x: -4.5, y: 4.5, z: -3.5 },
@@ -230,12 +255,10 @@ export class WorldScene {
 
     this.camera.aspect = aspect;
 
-    // Desired horizontal span to fit all crackers comfortably with margins
     const requiredHorizontalHalfWidth = 4.0;
     const requiredVerticalHalfHeight = 3.6;
 
     if (aspect < 1.0) {
-      // Mobile portrait framing
       this.camera.fov = 55;
       const radV = THREE.MathUtils.degToRad(this.camera.fov * 0.5);
       const radH = Math.atan(aspect * Math.tan(radV));
@@ -250,7 +273,6 @@ export class WorldScene {
       this.baseCameraPos.set(0, targetY, targetZ);
       this.cameraLookTarget.set(0, 0.35, 0.1);
     } else {
-      // Desktop / Tablet landscape
       this.camera.fov = 45;
       this.baseCameraPos.set(0, 5.4, 8.2);
       this.cameraLookTarget.set(0, 0.5, 0.2);
@@ -265,6 +287,29 @@ export class WorldScene {
   }
 
   update(delta) {
+    // 1. Slow & majestic ground platform rotation (~140s per full 360 turn)
+    if (this.tableGroup) {
+      this.tableGroup.rotation.y += 0.045 * delta;
+    }
+
+    // 2. Diya lamp flames wiggle and dance in the festive breeze
+    const now = performance.now() * 0.001;
+    if (this.diyaFlames) {
+      this.diyaFlames.forEach(f => {
+        // Organic sway / wiggle
+        const swayZ = Math.sin(now * f.speed + f.phase) * 0.18 + Math.sin(now * (f.speed * 1.7) + f.phase) * 0.06;
+        const swayX = Math.cos(now * (f.speed * 0.8) + f.phase) * 0.12;
+        f.group.rotation.z = swayZ;
+        f.group.rotation.x = swayX;
+
+        // Dynamic flicker scale
+        const scaleY = 1.0 + Math.sin(now * (f.speed * 1.5) + f.phase) * 0.16;
+        const scaleXZ = 1.0 + Math.cos(now * f.speed + f.phase) * 0.09;
+        f.group.scale.set(scaleXZ, scaleY, scaleXZ);
+      });
+    }
+
+    // 3. Camera shake
     if (this.shakeTimer > 0) {
       this.shakeTimer -= delta;
       const progress = this.shakeTimer / this.shakeDuration;
@@ -279,10 +324,11 @@ export class WorldScene {
       this.camera.lookAt(this.cameraLookTarget);
     }
 
-    const time = performance.now() * 0.0015;
+    // 4. Hanging lanterns sway
+    const lanternTime = performance.now() * 0.0015;
     if (this.lanterns) {
       this.lanterns.forEach(l => {
-        l.group.rotation.z = Math.sin(time + l.phase) * 0.06;
+        l.group.rotation.z = Math.sin(lanternTime + l.phase) * 0.06;
       });
     }
   }

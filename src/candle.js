@@ -301,8 +301,15 @@ export class Candle {
     this.group.rotation.z += (targetTiltZ - this.group.rotation.z) * 10 * delta;
 
     if (!this.isLocked && !this.isFading) {
-      const scaleY = 1.0 + Math.sin(this.time * 16) * 0.08;
-      this.flameOuter.scale.set(1.0, scaleY, 1.0);
+      // Natural flame wiggle & sway in ambient air
+      const flameSwayZ = Math.sin(this.time * 11) * 0.16 + Math.sin(this.time * 24) * 0.06 - this.velocity.x * 0.03;
+      const flameSwayX = Math.cos(this.time * 9) * 0.12 - this.velocity.z * 0.03;
+      this.flameGroup.rotation.z = flameSwayZ;
+      this.flameGroup.rotation.x = flameSwayX;
+
+      const scaleY = 1.0 + Math.sin(this.time * 16) * 0.12;
+      const scaleXZ = 1.0 + Math.cos(this.time * 13) * 0.08;
+      this.flameOuter.scale.set(scaleXZ, scaleY, scaleXZ);
     }
   }
 }
