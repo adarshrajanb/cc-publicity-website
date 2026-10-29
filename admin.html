@@ -453,7 +453,7 @@
 
   <script>
     const STORAGE_CLAIM_KEY = 'diwali_cracker_stunt_claim_v1';
-    const DEFAULT_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScXQ_SAMPLE_TICKET_CLAIM/viewform';
+    const DEFAULT_FORM_URL = 'https://docs.google.com/forms/d/1fDrsXvwOUhvaRtPJY9EG1fMdvukySyDRmyGsN-JDYJk/viewform?edit_requested=true';
     const CORRECT_PIN = '1234';
 
     // PIN Authentication
@@ -489,7 +489,11 @@
     const resetFormBtn = document.getElementById('reset-default-url-btn');
 
     const loadFormUrl = () => {
-      const saved = localStorage.getItem('diwali_forms_url') || DEFAULT_FORM_URL;
+      let saved = localStorage.getItem('diwali_forms_url');
+      if (!saved || saved.includes('SAMPLE_TICKET_CLAIM')) {
+        saved = DEFAULT_FORM_URL;
+        localStorage.setItem('diwali_forms_url', DEFAULT_FORM_URL);
+      }
       formUrlInput.value = saved;
     };
     loadFormUrl();
@@ -510,10 +514,10 @@
     });
 
     resetFormBtn.addEventListener('click', () => {
-      if (confirm('Reset Google Form link to default sample URL?')) {
-        localStorage.removeItem('diwali_forms_url');
+      if (confirm('Reset Google Form link to official Cultural Council form?')) {
+        localStorage.setItem('diwali_forms_url', DEFAULT_FORM_URL);
         formUrlInput.value = DEFAULT_FORM_URL;
-        showToast('Reset to default URL');
+        showToast('Reset to official Google Form URL');
       }
     });
 

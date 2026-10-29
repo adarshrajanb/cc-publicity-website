@@ -8,9 +8,9 @@ import { soundEngine } from './audio.js';
 
 // ==============================================================
 // 🪔 GOOGLE FORMS REDIRECTION CONFIGURATION
-// Replace anytime with official Cultural Council Google Form URL
+// Cultural Council Official Ticket Claim Google Form URL
 // ==============================================================
-export const GOOGLE_FORMS_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScXQ_SAMPLE_TICKET_CLAIM/viewform';
+export const GOOGLE_FORMS_URL = 'https://docs.google.com/forms/d/1fDrsXvwOUhvaRtPJY9EG1fMdvukySyDRmyGsN-JDYJk/viewform?edit_requested=true';
 const STORAGE_CLAIM_KEY = 'diwali_cracker_stunt_claim_v1';
 
 class App {
@@ -52,7 +52,13 @@ class App {
     this.isRedirectPaused = false;
     this.countdownInterval = null;
 
-    this.googleFormsUrl = localStorage.getItem('diwali_forms_url') || GOOGLE_FORMS_URL;
+    const savedFormUrl = localStorage.getItem('diwali_forms_url');
+    if (!savedFormUrl || savedFormUrl.includes('SAMPLE_TICKET_CLAIM')) {
+      this.googleFormsUrl = GOOGLE_FORMS_URL;
+      localStorage.setItem('diwali_forms_url', GOOGLE_FORMS_URL);
+    } else {
+      this.googleFormsUrl = savedFormUrl;
+    }
     this.updateClaimButtonUrl();
 
     // Check URL query ?reset=true for developer testing

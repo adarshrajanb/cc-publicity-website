@@ -766,6 +766,20 @@ body, html {
   text-align: right;
   padding-top: 0.2rem;
   letter-spacing: 0.5px;
+  line-height: 1.25;
+}
+
+.timeline-time .time-start {
+  display: block;
+  font-size: 0.86rem;
+  color: #fff;
+}
+
+.timeline-time .time-to {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--gold);
+  opacity: 0.9;
 }
 
 .timeline-dot {
@@ -799,11 +813,40 @@ body, html {
   border-color: rgba(248, 192, 69, 0.4);
 }
 
-.timeline-body h4 {
+.timeline-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+
+.timeline-title-row h4 {
   font-size: 0.95rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 0.25rem;
+  margin: 0;
+}
+
+.timeline-venue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(248, 192, 69, 0.14);
+  border: 1px solid rgba(248, 192, 69, 0.32);
+  color: #ffd700;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.18rem 0.55rem;
+  border-radius: 9999px;
+  letter-spacing: 0.2px;
+}
+
+.timeline-item.highlight .timeline-venue {
+  background: rgba(0, 230, 118, 0.15);
+  border-color: rgba(0, 230, 118, 0.45);
+  color: #00e676;
 }
 
 .timeline-body p {
