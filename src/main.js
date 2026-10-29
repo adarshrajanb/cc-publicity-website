@@ -264,28 +264,56 @@ class App {
       if (e.target === this.rewardModal) returnToScreen();
     });
 
-    // Schedule Modal Controls
+    // Schedule Panel Controls (Docked in right area on desktop, slide drawer on mobile)
+    const updateScheduleBtn = (isActive) => {
+      if (this.scheduleBtn) {
+        if (isActive) {
+          this.scheduleBtn.classList.add('active');
+        } else {
+          this.scheduleBtn.classList.remove('active');
+        }
+      }
+    };
+
     const openSchedule = () => {
       if (this.scheduleModal) {
         this.scheduleModal.classList.add('active');
+        updateScheduleBtn(true);
         soundEngine.playWhoosh(0.5);
       }
     };
+
     const closeSchedule = () => {
       if (this.scheduleModal) {
         this.scheduleModal.classList.remove('active');
+        updateScheduleBtn(false);
         soundEngine.playWhoosh(0.4);
       }
     };
 
-    if (this.scheduleBtn) this.scheduleBtn.addEventListener('click', openSchedule);
+    const toggleSchedule = () => {
+      if (this.scheduleModal) {
+        if (this.scheduleModal.classList.contains('active')) {
+          closeSchedule();
+        } else {
+          openSchedule();
+        }
+      }
+    };
+
+    if (this.scheduleBtn) this.scheduleBtn.addEventListener('click', toggleSchedule);
     if (this.closeScheduleXBtn) this.closeScheduleXBtn.addEventListener('click', closeSchedule);
     if (this.closeScheduleBtn) this.closeScheduleBtn.addEventListener('click', closeSchedule);
 
-    if (this.scheduleModal) {
-      this.scheduleModal.addEventListener('click', (e) => {
-        if (e.target === this.scheduleModal) closeSchedule();
-      });
+    const scheduleBackdrop = document.getElementById('schedule-backdrop');
+    if (scheduleBackdrop) {
+      scheduleBackdrop.addEventListener('click', closeSchedule);
+    }
+
+    // Default on Desktop: Dock schedule panel in marked area right away
+    if (window.innerWidth >= 900 && this.scheduleModal) {
+      this.scheduleModal.classList.add('active');
+      updateScheduleBtn(true);
     }
 
     window.addEventListener('keydown', (e) => {

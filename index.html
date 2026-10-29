@@ -157,14 +157,17 @@
     </div>
   </div>
 
-  <!-- Event Schedule Modal -->
-  <div id="schedule-modal" class="modal-overlay">
+  <!-- Event Schedule Side Panel (Docked in marked right area on desktop, slide-over drawer on mobile) -->
+  <aside id="schedule-modal" class="schedule-side-panel" aria-label="Diwali Event Schedule">
+    <div id="schedule-backdrop" class="schedule-backdrop"></div>
     <div class="schedule-content">
-      <button id="close-schedule-x-btn" class="close-x-btn" title="Close schedule">&times;</button>
       <div class="schedule-header">
-        <div class="burst-tag" style="background: linear-gradient(135deg, #ff9900, #ff5500);">📅 DIWALI CELEBRATION 2026</div>
+        <div class="schedule-header-top">
+          <div class="burst-tag" style="background: linear-gradient(135deg, #ff9900, #ff5500); font-size: 0.65rem; padding: 0.18rem 0.5rem; letter-spacing: 0.5px;">📅 DIWALI 2026</div>
+          <button id="close-schedule-x-btn" class="schedule-close-btn" title="Toggle schedule">✕</button>
+        </div>
         <h2>EVENT SCHEDULE</h2>
-        <p>Presented by the Cultural Council</p>
+        <p>Cultural Council • NIT Trichy</p>
       </div>
 
       <div class="timeline-list">
@@ -313,13 +316,13 @@
         </div>
       </div>
 
-      <div class="modal-primary-actions" style="margin-top:0.5rem;">
-        <button id="close-schedule-btn" class="primary-btn" style="padding:0.8rem 1.4rem; font-size:0.95rem;">
-          <span>Back to Crackers</span>
+      <div class="schedule-footer">
+        <button id="close-schedule-btn" class="schedule-hide-btn">
+          <span>✕ Hide Schedule</span>
         </button>
       </div>
     </div>
-  </div>
+  </aside>
 
   <!-- Settings / Google Form URL Config Modal -->
   <div id="settings-modal" class="settings-modal-overlay">
